@@ -1,0 +1,91 @@
+# just some stuff i wrote in r
+
+
+require(qu)
+
+#quantmod
+#https://www.quantmod.com/
+# Install and load the package
+#install.packages("quantmod")
+library(quantmod)
+
+# Define the ticker symbol (e.g., Vanguard 500 Index Fund Admiral Shares)
+ticker <- "VFIAX"
+
+# Download historical data
+getSymbols(ticker, src = "yahoo", from = "2020-01-01", to = Sys.Date())
+
+# View the data
+head(VFIAX)
+
+# Plot the closing prices
+chartSeries(VFIAX)
+
+getFinancials(ticker)
+
+
+# tidyquant
+#install.packages("tidyquant")
+require(tidyquant)
+
+tq_index_options()
+
+data <- tq_index("SP500")
+data
+
+tq_get_options()
+
+stock <- tq_get("MSFT")
+stock
+
+vt <- tq_get("VT")
+vt
+
+
+library(tidyquant)
+library(PerformanceAnalytics)
+library(dplyr)
+
+# 1. Get Data (Fund + Benchmark)
+symbols <- c("VFIAX", "SPY")
+price_data <- tq_get(symbols, from = "2020-01-01", to = "2025-01-01", get = "stock.prices")
+
+# 2. Calculate Monthly Returns
+returns_data <- price_data %>%
+  group_by(symbol) %>%
+  tq_transmute(select = adjusted, mutate_fun = periodReturn, period = "monthly")
+
+# 3. Calculate Alpha and Beta
+# Split data into fund and benchmark
+fund_returns <- returns_data %>% filter(symbol == "VFIAX") %>% select(date, monthly.returns)
+bench_returns <- returns_data %>% filter(symbol == "SPY") %>% select(date, monthly.returns)
+
+# Combine and calculate
+portfolio_returns <- left_join(fund_returns, bench_returns, by = "date") %>%
+  tq_performance(Ra = monthly.returns.x, Rb = monthly.returns.y, 
+                 performance_fun = table.CAPM)
+
+print(portfolio_returns)
+
+datas <- Quandl.datatable("NFN/MFRFI")
+
+
+# potential sources
+https://pypi.org/project/morningstar-data/
+https://data.nasdaq.com/databases/MFR
+https://data.nasdaq.com/individual-users
+https://catalog.data.gov/dataset/mutual-fund-prospectus-risk-return-summary-data-sets
+https://www.lseg.com/en/data-analytics/financial-data/fund-data/lipper-fund-data
+https://data.nasdaq.com/databases/MFR
+https://www.quantconnect.com/docs/v2/writing-algorithms/datasets/nasdaq/data-link
+https://support.google.com/docs/answer/3093281?hl=en&visit_id=639074729556329148-4092489334&rd=1
+https://docs.google.com/spreadsheets/d/1kj8muUtlIz_AZbJyZHc0sUMq0n9Lp_5J2oLA_io2GvM/edit?gid=1#gid=1
+https://stackoverflow.com/questions/17759621/how-to-get-the-list-of-all-yahoo-finance-mutual-funds-in-r
+https://www.alphavantage.co/documentation/
+https://pypi.org/project/investpy/
+https://rpubs.com/kevin_J_Scott/tq_get
+https://pandas-datareader.readthedocs.io/en/latest/readers/quandl.html
+https://www.factset.com/tour/iam-workstation-tour
+https://pypi.org/project/morningstar-data/
+
+  
